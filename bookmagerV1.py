@@ -2,18 +2,18 @@
 from Tkinter import *
 import webbrowser
 import sqlite3
+import os
 
                             #New Bookmark
 def new_bookmark():
     """ Create New Bookmark """
     new_bk = New_bookmark_page()
-
+#------------------------------------------------------------------------------------------------
                             #Choose Bookmark
 def choose_bm():
     """ link bookmark to save bookmark in that file """
     choose_book = Choose_bookmark()
-
-
+#------------------------------------------------------------------------------------------------
                             #Open Web
 def open_web():
     web = seach_entry.get()
@@ -22,7 +22,7 @@ def open_web():
     else:
         web = 'https://www.google.co.th/?gws_rd=ssl#q=' + web
         webbrowser.open(web)
-
+#------------------------------------------------------------------------------------------------
                             #Add Book
 def add_book():
     """ Push URL to database file """
@@ -33,22 +33,23 @@ def add_book():
         web = 'https://www.google.co.th/?gws_rd=ssl#q=' + web
         cur.execute("insert into bookmark values ('%s')" % web)
     con.commit()
-    
+#------------------------------------------------------------------------------------------------    
                             #Read Data
 def OnRigthMouseClick(event):
     """ This event will run if right mouse was clicked """
     items = listbox.curselection()[0] #print index of data in listbox
     x = Open_web(data[items][0])
     x.open_web()
-
+#------------------------------------------------------------------------------------------------
                             #HELP PAGE
 def help_page():
     """ Help page """
     help_page = Window("Help")
     help_frame = Frame(help_page.windows, text="Help User")
     help_frame.pack()
+    help_label = Label(help_page.windows, text='%s' % open('developer.txt', 'r'))
     help_page.make_win()
-
+#------------------------------------------------------------------------------------------------
 class Open_web(object):
     """ """
     def __init__(self, url):
@@ -60,7 +61,7 @@ class Open_web(object):
         else:
             web = 'https://www.google.co.th/?gws_rd=ssl#q='
         webbrowser.open(web)
-
+#------------------------------------------------------------------------------------------------
                             #WINDOW
 class Window(Tk):
     """ Programme's window class """
@@ -114,7 +115,7 @@ class Window(Tk):
         scrollbar.pack(sid=LEFT, fill=Y)
         scrollbar.config(command=listbox.yview)
         listbox.bind("<Double-Button-1>", OnRigthMouseClick)
-
+#------------------------------------------------------------------------------------------------
 class Main_window(Window):
     """ Main programme window """
     def __init__(self, title):
@@ -159,7 +160,7 @@ class Main_window(Window):
             web = 'https://www.google.co.th/?gws_rd=ssl#q=' + web
             cur.execute("insert into bookmark values ('%s')" % web)
         con.commit()
-        
+#------------------------------------------------------------------------------------------------        
 value = 1
 class Check_first(Window):
     """ if first open, it will make a database's table """
@@ -183,7 +184,7 @@ class Check_first(Window):
     def choose_no(self):
         """ open the main window """
         self.check.windows.destroy()
-
+#------------------------------------------------------------------------------------------------
 class New_bookmark_page(Window):
         def __init__(self):
             self.first_bk = Window("Create Your Bookmark file")
@@ -207,7 +208,7 @@ class New_bookmark_page(Window):
             self.first_bk.windows.destroy()
         def choose_cancel(self):
             self.first_bk.windows.destroy()
-
+#------------------------------------------------------------------------------------------------
 class Choose_bookmark(Window):
     """ """
     def __init__(self):
@@ -215,21 +216,48 @@ class Choose_bookmark(Window):
         self.cb = Window("Choose your bookmark")
         self.name_label = Label(self.cb.windows, text='please Insert your bookmark name')
         self.name_label.pack()
+
+        #listbox
+        i = 0
+        self.data = {}
+        for file_n in os.listdir(cwd):
+            self.data[i] = file_n
+            i += 1
+            print self.data
+        self.scrollbar = Scrollbar(self.cb.windows)
+        self.listbox = Listbox(self.cb.windows,\
+                          yscrollcommand=self.scrollbar.set,\
+                          width=50, selectmode=EXTENDED)
+        self.listbox.config(selectbackground='orange')
+        for i in self.data:
+            self.listbox.insert(END, self.data[i])
+        self.listbox.pack(side=LEFT, fill=BOTH)
+        self.scrollbar.pack(sid=LEFT, fill=Y)
+        self.scrollbar.config(command=self.listbox.yview)
+        self.listbox.bind("<Double-Button-1>", self.double_click)
+        '''
         self.name_entry = Entry(self.cb.windows)
         self.name_entry.pack()
         self.choose_but = Button(self.cb.windows, text="Choose File", command=self.choose_bookmark)
         self.choose_but.pack(fill=X)
         self.cancel_but = Button(self.cb.windows, text="Cancel", command=self.choose_cancel)
-        self.cancel_but.pack(fill=X)
+        self.cancel_but.pack(fill=X)'''
         self.cb.make_win()
     def choose_bookmark(self):
         """ open wanted bookmark """
-        book_name = self.name_entry.get()
+        self.book_name = self.name_entry.get()
         global con, cur
-        con = sqlite3.connect("%s.db" % book_name)
+        con = sqlite3.connect("%s.db" % self.book_name)
         cur = con.cursor()
-
-
+    def double_click(self, event):
+        """ """
+        self.items = self.listbox.curselection()[0] #print index of data in listbox
+        print self.data[self.items]
+        global con, cur
+        con = sqlite3.connect("%s" % self.data[self.items])
+        cur = con.cursor()
+#------------------------------------------------------------------------------------------------
+cwd = os.getcwd()
 con = sqlite3.connect("bookmark.db")
 cur = con.cursor()
 
