@@ -235,13 +235,6 @@ class Choose_bookmark(Window):
         self.scrollbar.pack(sid=LEFT, fill=Y)
         self.scrollbar.config(command=self.listbox.yview)
         self.listbox.bind("<Double-Button-1>", self.double_click)
-        '''
-        self.name_entry = Entry(self.cb.windows)
-        self.name_entry.pack()
-        self.choose_but = Button(self.cb.windows, text="Choose File", command=self.choose_bookmark)
-        self.choose_but.pack(fill=X)
-        self.cancel_but = Button(self.cb.windows, text="Cancel", command=self.choose_cancel)
-        self.cancel_but.pack(fill=X)'''
         self.cb.make_win()
     def choose_bookmark(self):
         """ open wanted bookmark """
