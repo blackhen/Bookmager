@@ -3,24 +3,16 @@ from Tkinter import *
 import webbrowser
 import sqlite3
 
-class Open_web(object):
-    """ """
-    def __init__(self, url):
-        self.u = url
-    def open_web(self):
-        web = self.u
-        if 'www.' in web:
-            webbrowser.open(web)
-        else:
-            web = 'https://www.google.co.th/?gws_rd=ssl#q='
-        webbrowser.open(web)
-        
-
-
                             #New Bookmark
 def new_bookmark():
-    """ """
+    """ Create New Bookmark """
     new_bk = New_bookmark_page()
+
+                            #Choose Bookmark
+def choose_bm():
+    """ link bookmark to save bookmark in that file """
+    choose_book = Choose_bookmark()
+
 
                             #Open Web
 def open_web():
@@ -56,6 +48,19 @@ def help_page():
     help_frame = Frame(help_page.windows, text="Help User")
     help_frame.pack()
     help_page.make_win()
+
+class Open_web(object):
+    """ """
+    def __init__(self, url):
+        self.u = url
+    def open_web(self):
+        web = self.u
+        if 'www.' in web:
+            webbrowser.open(web)
+        else:
+            web = 'https://www.google.co.th/?gws_rd=ssl#q='
+        webbrowser.open(web)
+
                             #WINDOW
 class Window(Tk):
     """ Programme's window class """
@@ -74,6 +79,7 @@ class Window(Tk):
         help_mn = Menu(menubar, tearoff=0)
             #HOME MENU
         home_mn.add_command(label="New File", command=new_bookmark)
+        home_mn.add_command(label="Choose your bookmark", command=choose_bm)
         home_mn.add_command(label="Open Bookmark", command=self.read_data)
         home_mn.add_command(label="Export")
         home_mn.add_separator()
@@ -181,7 +187,6 @@ class Check_first(Window):
 class New_bookmark_page(Window):
         def __init__(self):
             self.first_bk = Window("Create Your Bookmark file")
-            
             self.name_label = Label(self.first_bk.windows, text='please Insert your bookmark name')
             self.name_label.pack()
             self.name_entry = Entry(self.first_bk.windows)
@@ -193,20 +198,36 @@ class New_bookmark_page(Window):
             self.first_bk.make_win()
         def new_bookmark(self):
             """ """
-            bookmark_name = self.name_entry.get()
+            self.bookmark_name = self.name_entry.get()
             global con
             global cur
-            con = sqlite3.connect("%s.db" % bookmark_name)
+            con = sqlite3.connect("%s.db" % self.bookmark_name)
             cur = con.cursor()
             cur.execute('create table bookmark (url text)')
             self.first_bk.windows.destroy()
         def choose_cancel(self):
             self.first_bk.windows.destroy()
-class New_bookmark(Window):
+
+class Choose_bookmark(Window):
+    """ """
     def __init__(self):
-        self.nb = Window("Create New Bookmark")
-        self.nb.make_win()
-        
+        """ """
+        self.cb = Window("Choose your bookmark")
+        self.name_label = Label(self.cb.windows, text='please Insert your bookmark name')
+        self.name_label.pack()
+        self.name_entry = Entry(self.cb.windows)
+        self.name_entry.pack()
+        self.choose_but = Button(self.cb.windows, text="Choose File", command=self.choose_bookmark)
+        self.choose_but.pack(fill=X)
+        self.cancel_but = Button(self.cb.windows, text="Cancel", command=self.choose_cancel)
+        self.cancel_but.pack(fill=X)
+        self.cb.make_win()
+    def choose_bookmark(self):
+        """ open wanted bookmark """
+        book_name = self.name_entry.get()
+        global con, cur
+        con = sqlite3.connect("%s.db" % book_name)
+        cur = con.cursor()
 
 
 con = sqlite3.connect("bookmark.db")
