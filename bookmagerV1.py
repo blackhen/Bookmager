@@ -15,13 +15,12 @@ class Open_web(object):
             web = 'https://www.google.co.th/?gws_rd=ssl#q='
         webbrowser.open(web)
         
-                            #Top Level
-def toplv():
-    top = Toplevel().title("Toplevel")
+
 
                             #New Bookmark
 def new_bookmark():
-    con = sqlite3.connect("'%s'.db" % raw_input())    
+    """ """
+    new_bk = New_bookmark_page()
 
                             #Open Web
 def open_web():
@@ -49,12 +48,13 @@ def OnRigthMouseClick(event):
     items = listbox.curselection()[0] #print index of data in listbox
     x = Open_web(data[items][0])
     x.open_web()
-    
 
                             #HELP PAGE
 def help_page():
     """ Help page """
     help_page = Window("Help")
+    help_frame = Frame(help_page.windows, text="Help User")
+    help_frame.pack()
     help_page.make_win()
                             #WINDOW
 class Window(Tk):
@@ -73,7 +73,7 @@ class Window(Tk):
         home_mn = Menu(menubar, tearoff=0)
         help_mn = Menu(menubar, tearoff=0)
             #HOME MENU
-        home_mn.add_command(label="New File")
+        home_mn.add_command(label="New File", command=new_bookmark)
         home_mn.add_command(label="Open Bookmark", command=self.read_data)
         home_mn.add_command(label="Export")
         home_mn.add_separator()
@@ -171,13 +171,44 @@ class Check_first(Window):
         mainloop()
     def choose_yes(self):
         """ Create database table before open the main window """
-        cur.execute('create table bookmark (url text)')
         self.check.windows.destroy()
-
+        self.fisrt_creat =  New_bookmark_page()
+        
     def choose_no(self):
         """ open the main window """
         self.check.windows.destroy()
+
+class New_bookmark_page(Window):
+        def __init__(self):
+            self.first_bk = Window("Create Your Bookmark file")
+            
+            self.name_label = Label(self.first_bk.windows, text='please Insert your bookmark name')
+            self.name_label.pack()
+            self.name_entry = Entry(self.first_bk.windows)
+            self.name_entry.pack()
+            self.creat_but = Button(self.first_bk.windows, text="Create File", command=self.new_bookmark)
+            self.creat_but.pack(fill=X)
+            self.cancel_but = Button(self.first_bk.windows, text="Cancel", command=self.choose_cancel)
+            self.cancel_but.pack(fill=X)
+            self.first_bk.make_win()
+        def new_bookmark(self):
+            """ """
+            bookmark_name = self.name_entry.get()
+            global con
+            global cur
+            con = sqlite3.connect("%s.db" % bookmark_name)
+            cur = con.cursor()
+            cur.execute('create table bookmark (url text)')
+            self.first_bk.windows.destroy()
+        def choose_cancel(self):
+            self.first_bk.windows.destroy()
+class New_bookmark(Window):
+    def __init__(self):
+        self.nb = Window("Create New Bookmark")
+        self.nb.make_win()
         
+
+
 con = sqlite3.connect("bookmark.db")
 cur = con.cursor()
 
