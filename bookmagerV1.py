@@ -337,8 +337,7 @@ class New_bookmark_page(Window):
 
 ##------------------------------------------------------------------------------------------------
 
-#Build First File database
-##con = sqlite3.connect('test.db')
+#If You Build First File database
 ##con.execute('''CREATE TABLE bookmark
 ##             (url text, name text)''')
 
