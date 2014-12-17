@@ -1,6 +1,9 @@
 ''' Bookmager V1 '''
 from Tkinter import *
 import webbrowser, sqlite3, os
+cwd = os.getcwd()
+con = sqlite3.connect('bookmark.db')
+cur = con.cursor()
 ##
 ##                            #New Bookmark
 def new_bookmark():
@@ -60,6 +63,9 @@ def choose_bm():
 ##            web = 'https://www.google.co.th/?gws_rd=ssl#q='
 ##        webbrowser.open(web)
 ##------------------------------------------------------------------------------------------------
+
+
+##----------------------------------------------------------------------------------------        
                             #Menubar
 class Window(Tk):
     """ Programme's window class """
@@ -125,6 +131,83 @@ def read_data_re():
             print data  
         for i in data:
             listbox.insert(END, data[i])
+##------------------------------------------------------------------------------------------------
+    ##choose
+class Choose_bookmark(Window):
+    """ """
+    def __init__(self):
+        """ """
+        self.cb = Window("Open")
+        #listbox
+        num = 0
+        self.data = {}
+        for file_n in os.listdir(cwd):
+            if file_n.endswith('.db'):
+                self.data[num] = file_n
+                num += 1
+        print self.data
+        self.scrollbar = Scrollbar(self.cb.windows)
+        self.listbox = Listbox(self.cb.windows,\
+                          yscrollcommand=self.scrollbar.set,\
+                          width=50, selectmode=EXTENDED)
+        self.listbox.config(selectbackground='orange')
+        for num in self.data:
+            self.listbox.insert(END, self.data[num])
+        self.listbox.pack(side=LEFT, fill=BOTH)
+        self.scrollbar.pack(sid=LEFT, fill=Y)
+        self.scrollbar.config(command=self.listbox.yview)
+        self.listbox.bind("<Double-Button-1>", self.double_click)
+        self.change_but = Button(self.cb.windows, text="Open", command=self.choose_bookmark)
+        self.change_but.pack(fill=X)
+        self.cancel_but = Button(self.cb.windows, text="Cancel", command=self.choose_cancel)
+        self.cancel_but.pack(fill=X)
+        self.cb.make_win()
+        
+        
+    def choose_bookmark(self):
+        """ open wanted bookmark """
+        self.items = int(self.listbox.curselection()[0]) #print index of data in listbox
+        print self.data[self.items]
+        global con
+        global cur
+        con = sqlite3.connect('%s' %self.data[self.items])
+        cur = con.cursor()
+        read_data_re()
+        listbox.delete(0, END)
+        i = 0
+        global data
+        data = {}
+        for row in cur.execute('SELECT * FROM bookmark'):
+            data[i] = row[1]+' '*(15-len(row[1]))+row[0]
+            i += 1
+            print data  
+        for i in data:
+            listbox.insert(END, data[i])
+        self.cb.windows.destroy()
+        
+    def double_click(self, event):
+        """ """
+        self.items = int(self.listbox.curselection()[0]) #print index of data in listbox
+        print self.data[self.items], cwd, "'"+self.data[self.items]+"'"
+        global con
+        global cur
+        con = sqlite3.connect('%s' %self.data[self.items])
+        cur = con.cursor()
+        print cur.execute('select name from sqlite_master where type="table"').fetchall()
+        listbox.delete(0, END)
+        i = 0
+        global data
+        data = {}
+        for row in cur.execute('SELECT * FROM bookmark'):
+            data[i] = row[1]+' '*(15-len(row[1]))+row[0]
+            i += 1
+            print data  
+        for i in data:
+            listbox.insert(END, data[i])
+        
+        
+    def choose_cancel(self):
+        self.cb.windows.destroy()
 ##------------------------------------------------------------------------------------------------
 class Main_window(Window):
     """ Main programme window """
@@ -266,68 +349,18 @@ class New_bookmark_page(Window):
             con.execute('''CREATE TABLE bookmark (url text, name text)''')
             cur = con.cursor()
             read_data_re()
-            
-            
             self.first_bk.windows.destroy()
+            
         def choose_cancel(self):
             self.first_bk.windows.destroy()
 ##------------------------------------------------------------------------------------------------
-class Choose_bookmark(Window):
-    """ """
-    def __init__(self):
-        """ """
-        self.cb = Window("Open")
-        #listbox
-        num = 0
-        self.data = {}
-        for file_n in os.listdir(cwd):
-            if file_n.endswith('.db'):
-                self.data[num] = file_n
-                num += 1
-        print self.data
-        self.scrollbar = Scrollbar(self.cb.windows)
-        self.listbox = Listbox(self.cb.windows,\
-                          yscrollcommand=self.scrollbar.set,\
-                          width=50, selectmode=EXTENDED)
-        self.listbox.config(selectbackground='orange')
-        for num in self.data:
-            self.listbox.insert(END, self.data[num])
-        self.listbox.pack(side=LEFT, fill=BOTH)
-        self.scrollbar.pack(sid=LEFT, fill=Y)
-        self.scrollbar.config(command=self.listbox.yview)
-        self.listbox.bind("<Double-Button-1>", self.double_click)
-        self.change_but = Button(self.cb.windows, text="Open", command=self.choose_bookmark)
-        self.change_but.pack(fill=X)
-        self.cb.make_win()
-        
-        
-    def choose_bookmark(self):
-        """ open wanted bookmark """
-        self.items = int(self.listbox.curselection()[0]) #print index of data in listbox
-        print self.data[self.items]
-        change(self.data[self.items])
-        self.cb.windows.destroy()
 
-        
-    def double_click(self, event):
-        """ """
-        self.items = int(self.listbox.curselection()[0]) #print index of data in listbox
-        print self.data[self.items]
-        change(self.data[self.items])
-        self.cb.windows.destroy()
 
-def change(fire):
-    global con
-    global cur
-    con = sqlite3.connect("'"+fire+"'")
-    cur = con.cursor()
-    read_data_re()
 ##------------------------------------------------------------------------------------------------
-cwd = os.getcwd()
-con = sqlite3.connect('bookmark.db')
+
 ##con = sqlite3.connect('test.db')
 ##con.execute('''CREATE TABLE bookmark
 ##             (url text, name text)''')
-cur = con.cursor()
+
 root = Main_window('Bookmager')
 
