@@ -41,7 +41,7 @@ class Window(Tk):
 
 #Re Data
 def read_data_re():
-        '''refreash_data'''
+        '''refresh_data'''
         listbox.delete(0, END)
         i = 0
         global data
@@ -62,7 +62,7 @@ class Choose_bookmark(Window):
         """Main"""
         self.cb = Window("Open")
         #listbox
-        num = 0
+        num = 0 #key
         self.data = {}
         for file_n in os.listdir(cwd):
             if file_n.endswith('.db'):
